@@ -2,6 +2,9 @@
 import Phaser from 'phaser'
 import Mushroom from '../sprites/Mushroom'
 
+var map;
+var layer;
+
 export default class extends Phaser.State {
   init (){
     // Start the Arcade physics system (for movements and collisions)
@@ -15,9 +18,32 @@ export default class extends Phaser.State {
     game.load.image('wall', 'assets/wall.png');
     game.load.image('coin', 'assets/coin.png');
     game.load.image('enemy', 'assets/enemy.png');
+
+    game.load.tilemap('level', 'assets/level.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.image('tiles', 'assets/Set_01.png');
   }
 
   create () {
+
+    map = game.add.tilemap('level');
+
+    var game_width = map.widthInPixels;
+    var game_height = map.heightInPixels;
+
+
+    map.addTilesetImage('Set_01', 'tiles');
+    layer = map.createLayer('base');
+
+
+    this.walls = game.add.group();
+    this.coins = game.add.group();
+    this.enemies = game.add.group();
+
+    //  Here we create our coins group
+    this.coins = game.add.group();
+    this.coins.enableBody = true;
+
+    layer.resizeWorld();
 
     // Variable to store the arrow key pressed
     this.cursor = game.input.keyboard.createCursorKeys();
@@ -28,51 +54,21 @@ export default class extends Phaser.State {
     // Add gravity to make it fall
     this.player.body.gravity.y = 600;
 
-    // Create 3 groups that will contain our objects
-    this.walls = game.add.group();
-    this.coins = game.add.group();
-    this.enemies = game.add.group();
+    map.setCollisionBetween(1, 4, true, layer);
 
-    // Design the level. x = wall, o = coin, ! = lava.
-    var level = [
-        'xxxxxxxxxxxxxxxxxxxxxx',
-        '!         !          x',
-        '!                 o  x',
-        '!         o          x',
-        '!                    x',
-        '!     o   !    x     x',
-        'xxxxxxxxxxxxxxxx!!!!!x',
-    ];
+    // TODO: Add back in enemies and rename them to lava
 
-    // Create the level by going through the array
-    for (var i = 0; i < level.length; i++) {
-        for (var j = 0; j < level[i].length; j++) {
-
-            // Create a wall and add it to the 'walls' group
-            if (level[i][j] == 'x') {
-                var wall = game.add.sprite(30+20*j, 30+20*i, 'wall');
-                this.walls.add(wall);
-                wall.body.immovable = true;
-            }
-
-            // Create a coin and add it to the 'coins' group
-            else if (level[i][j] == 'o') {
-                var coin = game.add.sprite(30+20*j, 30+20*i, 'coin');
-                this.coins.add(coin);
-            }
-
-            // Create a enemy and add it to the 'enemies' group
-            else if (level[i][j] == '!') {
-                var enemy = game.add.sprite(30+20*j, 30+20*i, 'enemy');
-                this.enemies.add(enemy);
-            }
-        }
-    }
+    // // Create 3 groups that will contain our objects
+    // this.walls = game.add.group();
+    // this.coins = game.add.group();
+    // this.enemies = game.add.group();
+    //  And now we convert all of the Tiled objects with an ID of 34 into sprites within the coins group
+    map.createFromObjects('Object Layer 1', 1, 'coin', 0, true, false, this.coins);
   }
 
   update () {
     // Make the player and the walls collide
-    game.physics.arcade.collide(this.player, this.walls);
+    game.physics.arcade.collide(this.player, layer);
 
     // Call the 'takeCoin' function when the player takes a coin
     game.physics.arcade.overlap(this.player, this.coins, this.takeCoin, null, this);
@@ -91,7 +87,7 @@ export default class extends Phaser.State {
       this.player.body.velocity.x = 0;
     }
 
-    if (this.cursor.up.isDown && this.player.body.touching.down) {
+    if (this.cursor.up.isDown && this.player.body.blocked.down) {
       this.player.body.velocity.y = -250;
     }
   }
