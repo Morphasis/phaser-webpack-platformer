@@ -3,7 +3,8 @@ import Phaser from 'phaser'
 import Mushroom from '../sprites/Mushroom'
 
 var map;
-var layer;
+var base_layer;
+var lava_layer;
 
 export default class extends Phaser.State {
   init (){
@@ -30,9 +31,13 @@ export default class extends Phaser.State {
     var game_width = map.widthInPixels;
     var game_height = map.heightInPixels;
 
-
+    // Tileset
     map.addTilesetImage('Set_01', 'tiles');
-    layer = map.createLayer('base');
+
+    // Create the base layer
+    base_layer = map.createLayer('base');
+    // Create the lava layer
+    lava_layer = map.createLayer('lava');
 
 
     this.walls = game.add.group();
@@ -43,7 +48,7 @@ export default class extends Phaser.State {
     this.coins = game.add.group();
     this.coins.enableBody = true;
 
-    layer.resizeWorld();
+    base_layer.resizeWorld();
 
     // Variable to store the arrow key pressed
     this.cursor = game.input.keyboard.createCursorKeys();
@@ -54,27 +59,24 @@ export default class extends Phaser.State {
     // Add gravity to make it fall
     this.player.body.gravity.y = 600;
 
-    map.setCollisionBetween(1, 4, true, layer);
+    // This is the base (floor)
+    map.setCollision(3);
+    // This is the lava_layer
+    map.setCollision(2, true, lava_layer);
 
-    // TODO: Add back in enemies and rename them to lava
-
-    // // Create 3 groups that will contain our objects
-    // this.walls = game.add.group();
-    // this.coins = game.add.group();
-    // this.enemies = game.add.group();
     //  And now we convert all of the Tiled objects with an ID of 34 into sprites within the coins group
     map.createFromObjects('Object Layer 1', 1, 'coin', 0, true, false, this.coins);
   }
 
   update () {
     // Make the player and the walls collide
-    game.physics.arcade.collide(this.player, layer);
+    game.physics.arcade.collide(this.player, base_layer);
 
     // Call the 'takeCoin' function when the player takes a coin
     game.physics.arcade.overlap(this.player, this.coins, this.takeCoin, null, this);
 
     // Call the 'restart' function when the player touches the enemy
-    game.physics.arcade.overlap(this.player, this.enemies, this.restart, null, this);
+    game.physics.arcade.collide(this.player, lava_layer, this.restart, null, this);
 
     // Move the player when an arrow key is pressed
     if (this.cursor.left.isDown) {
@@ -92,11 +94,7 @@ export default class extends Phaser.State {
     }
   }
 
-  render () {
-    if (__DEV__) {
-      // this.game.debug.spriteInfo(this.mushroom, 32, 32)
-    }
-  }
+  render () {}
 
   // Function to kill a coin
   takeCoin (player, coin) {
