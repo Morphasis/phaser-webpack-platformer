@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="20" tileheight="20" backgroundcolor="#e9ebb9" nextobjectid="132">
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="20" tileheight="20" backgroundcolor="#e9ebb9" nextobjectid="138">
  <tileset firstgid="1" name="Set_01" tilewidth="20" tileheight="20" tilecount="4" columns="2">
+  <image source="Set_01.png" width="40" height="40"/>
+ </tileset>
+ <tileset firstgid="5" name="Set_01" tilewidth="20" tileheight="20" tilecount="4" columns="2">
   <image source="Set_01.png" width="40" height="40"/>
  </tileset>
  <layer name="base" width="50" height="50">
@@ -147,5 +150,11 @@
   <object id="124" gid="1" x="939" y="599" width="20" height="20"/>
   <object id="125" gid="1" x="940" y="661" width="20" height="20"/>
   <object id="126" gid="1" x="341" y="280" width="20" height="20"/>
+  <object id="132" gid="5" x="178" y="349" width="20" height="20"/>
+  <object id="133" gid="5" x="212" y="374" width="20" height="20"/>
+  <object id="134" gid="5" x="241" y="333" width="20" height="20"/>
+  <object id="135" gid="5" x="130" y="89" width="20" height="20"/>
+  <object id="136" gid="5" x="159" y="118" width="20" height="20"/>
+  <object id="137" gid="5" x="197" y="88" width="20" height="20"/>
  </objectgroup>
 </map>
