@@ -5,15 +5,19 @@ import Mushroom from '../sprites/Mushroom'
 var map;
 var base_layer;
 var lava_layer;
+var gameSound;
 
 export default class extends Phaser.State {
   init (){
     // Start the Arcade physics system (for movements and collisions)
     this.physics.startSystem(Phaser.Physics.ARCADE);
-    // Add the physics engine to all game objects
+    // Add the physics engine to all `game` objects
     this.world.enableBody = true;
   }
   preload () {
+
+    game.load.audio('gameSound', 'assets/coin_sound.wav');
+
     // Platformer images
     game.load.image('player', 'assets/player.png');
     game.load.image('wall', 'assets/wall.png');
@@ -25,6 +29,9 @@ export default class extends Phaser.State {
   }
 
   create () {
+
+    // capture coin sound
+    gameSound = game.add.audio('gameSound');
 
     map = game.add.tilemap('level');
 
@@ -98,11 +105,12 @@ export default class extends Phaser.State {
 
   // Function to kill a coin
   takeCoin (player, coin) {
-      coin.kill();
+    gameSound.play();
+    coin.kill();
   }
 
   // Function to restart the game
   restart () {
-      game.state.start('Game');
+    game.state.start('Game');
   }
 }
