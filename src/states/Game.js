@@ -3,8 +3,10 @@ import Phaser from 'phaser'
 import Mushroom from '../sprites/Mushroom'
 
 var map;
+var scaleRatio;
 var base_layer;
 var lava_layer;
+var non_colide_layer;
 var gameSound;
 
 export default class extends Phaser.State {
@@ -27,7 +29,7 @@ export default class extends Phaser.State {
   }
 
   create () {
-
+    game.world.setBounds(0, 0, 1400, 1400);
     // capture coin sound
     gameSound = game.add.audio('gameSound');
 
@@ -43,6 +45,8 @@ export default class extends Phaser.State {
     base_layer = map.createLayer('base');
     // Create the lava layer
     lava_layer = map.createLayer('lava');
+    // Create the non player interatction layer
+    non_colide_layer = map.createLayer('non_colide');
 
 
     this.walls = game.add.group();
@@ -65,12 +69,17 @@ export default class extends Phaser.State {
     this.player.body.gravity.y = 600;
 
     // This is the base (floor)
-    map.setCollision(3);
+    map.setCollision([3,4,5,6,7,8,9,10,11,12]);
     // This is the lava_layer
-    map.setCollision(2, true, lava_layer);
+    // TODO: Fix spikes (they should act the same as lava)
+    map.setCollision([1,2,3], true, lava_layer);
 
     //  And now we convert all of the Tiled objects with an ID of 34 into sprites within the coins group
-    map.createFromObjects('Object Layer 1', 1, 'coin', 0, true, false, this.coins);
+    map.createFromObjects('Object Layer 1', 121, 'coin', 0, true, false, this.coins);
+    // map.createFromObjects('Object Layer 1', 1, 'coin', 0, true, false, this.coins);
+
+
+    game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
   }
 
   update () {
@@ -95,7 +104,7 @@ export default class extends Phaser.State {
     }
 
     if (this.cursor.up.isDown && this.player.body.blocked.down) {
-      this.player.body.velocity.y = -250;
+      this.player.body.velocity.y = -350;
     }
   }
 
