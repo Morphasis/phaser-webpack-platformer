@@ -8,6 +8,8 @@ var base_layer;
 var lava_layer;
 var non_colide_layer;
 var gameSound;
+var teleporter;
+var teleporterAnimation;
 
 export default class extends Phaser.State {
   init (){
@@ -26,6 +28,7 @@ export default class extends Phaser.State {
 
     game.load.tilemap('level', 'assets/level.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'assets/Set_01.png');
+    game.load.spritesheet("teleporter_ani", "assets/teleporter_ani.png", 64, 96);
   }
 
   create () {
@@ -45,6 +48,12 @@ export default class extends Phaser.State {
     non_colide_layer = map.createLayer('non_colide');
     non_colide_layer = map.createLayer('non_colide2');
 
+    // Animations
+    this.teleporter = game.add.sprite(game.width / 2, game.height / 2, "teleporter_ani");
+
+    this.teleporterAnimation = this.teleporter.animations.add('teleporterAnimation', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]);
+
+    this.teleporter.idleFrame = 0;
 
     this.walls = game.add.group();
     this.coins = game.add.group();
@@ -100,6 +109,8 @@ export default class extends Phaser.State {
 
     // Move the player when an arrow key is pressed
     if (this.cursor.left.isDown) {
+      this.teleporter.animations.play("teleporterAnimation", 25, false);
+      this.teleporter.idleFrame = 0;
       this.player.body.velocity.x = -200;
     }
     else if (this.cursor.right.isDown) {
