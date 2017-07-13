@@ -47,6 +47,7 @@ export default class extends Phaser.State {
     lava_layer = map.createLayer('lava');
     // Create the non player interatction layer
     non_colide_layer = map.createLayer('non_colide');
+    non_colide_layer = map.createLayer('non_colide2');
 
 
     this.walls = game.add.group();
@@ -69,7 +70,7 @@ export default class extends Phaser.State {
     this.player.body.gravity.y = 600;
 
     // This is the base (floor)
-    map.setCollision([3,4,5,6,7,8,9,10,11,12]);
+    map.setCollision([3,4,5,6,7,8,9,10,11,12,13]);
     // This is the lava_layer
     // TODO: Fix spikes (they should act the same as lava)
     map.setCollision([1,2,3], true, lava_layer);
