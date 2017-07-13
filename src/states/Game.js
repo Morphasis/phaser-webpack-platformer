@@ -29,14 +29,10 @@ export default class extends Phaser.State {
   }
 
   create () {
-    game.world.setBounds(0, 0, 1400, 1400);
     // capture coin sound
     gameSound = game.add.audio('gameSound');
 
     map = game.add.tilemap('level');
-
-    var game_width = map.widthInPixels;
-    var game_height = map.heightInPixels;
 
     // Tileset
     map.addTilesetImage('Set_01', 'tiles');
@@ -53,6 +49,7 @@ export default class extends Phaser.State {
     this.walls = game.add.group();
     this.coins = game.add.group();
     this.enemies = game.add.group();
+    this.player = game.add.group();
 
     //  Here we create our coins group
     this.coins = game.add.group();
@@ -63,8 +60,16 @@ export default class extends Phaser.State {
     // Variable to store the arrow key pressed
     this.cursor = game.input.keyboard.createCursorKeys();
 
-    // Create the player in the middle of the game
-    this.player = game.add.sprite(70, 100, 'player');
+    // Create the player from the player object layer
+    map.createFromObjects('player', 1, 'player', 0, true, false, this.player);
+
+    // Enables physics on the player of type arcade
+    game.physics.arcade.enableBody(this.player.children[0]);
+
+    // Renames the player group to be the one sprite that is the child.
+    // Reason for this is to keep the code consistant with what was there before.
+    this.player = this.player.children[0]
+
 
     // Add gravity to make it fall
     this.player.body.gravity.y = 600;
