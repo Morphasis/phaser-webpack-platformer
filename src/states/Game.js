@@ -9,6 +9,8 @@ var background_layer;
 var coinSound;
 var teleporters;
 var teleported = false;
+var score = 0;
+var scoreText;
 
 export default class extends Phaser.State {
   init (){
@@ -93,6 +95,8 @@ export default class extends Phaser.State {
 
     // Camera follow player
     game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
+    scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    scoreText.fixedToCamera = true;
   }
 
   update () {
@@ -129,6 +133,8 @@ export default class extends Phaser.State {
   takeCoin (player, coin) {
     coinSound.play();
     coin.kill();
+    score += 10;
+    scoreText.text = 'Score: ' + score;
   }
 
   teleport () {
