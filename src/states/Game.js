@@ -3,13 +3,13 @@ import Phaser from 'phaser'
 import Mushroom from '../sprites/Mushroom'
 
 var map;
-var scaleRatio;
 var base_layer;
 var lava_layer;
 var non_colide_layer;
-var gameSound;
-var teleporter;
-var teleporterAnimation;
+var background_layer;
+var coinSound;
+var teleporters;
+var teleported = false;
 
 export default class extends Phaser.State {
   init (){
@@ -19,8 +19,7 @@ export default class extends Phaser.State {
     this.world.enableBody = true;
   }
   preload () {
-
-    game.load.audio('gameSound', 'assets/coin_sound.wav');
+    game.load.audio('coinSound', 'assets/coin_sound.wav');
 
     // Platformer images
     game.load.image('player', 'assets/player.png');
@@ -29,40 +28,43 @@ export default class extends Phaser.State {
     game.load.tilemap('level', 'assets/level.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'assets/Set_01.png');
     game.load.spritesheet("teleporter_ani", "assets/teleporter_ani.png", 64, 96);
+    if (teleported === true) {
+      setTimeout(function(){
+        teleported = false;
+      }, 3000);
+    }
   }
 
   create () {
     // capture coin sound
-    gameSound = game.add.audio('gameSound');
+    coinSound = game.add.audio('coinSound');
 
     map = game.add.tilemap('level');
 
     // Tileset
     map.addTilesetImage('Set_01', 'tiles');
 
-    // Create the base layer
+    // Create Layers
+    background_layer = map.createLayer('background');
     base_layer = map.createLayer('base');
-    // Create the lava layer
-    lava_layer = map.createLayer('lava');
-    // Create the non player interatction layer
     non_colide_layer = map.createLayer('non_colide');
     non_colide_layer = map.createLayer('non_colide2');
+    lava_layer = map.createLayer('lava');
 
     // Animations
-    this.teleporter = game.add.sprite(game.width / 2, game.height / 2, "teleporter_ani");
-
-    this.teleporterAnimation = this.teleporter.animations.add('teleporterAnimation', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]);
-
-    this.teleporter.idleFrame = 0;
-
-    this.walls = game.add.group();
     this.coins = game.add.group();
-    this.enemies = game.add.group();
     this.player = game.add.group();
+    teleporters = game.add.group();
+
+
 
     //  Here we create our coins group
-    this.coins = game.add.group();
     this.coins.enableBody = true;
+    teleporters.enableBody = true;
+    this.player.enableBody = true;
+
+    map.createFromObjects('Object Layer 1', 14766, 'teleporter_ani', 0, true, false, teleporters);
+    teleporters.callAll('animations.add', 'animations', 'teleporterAnimation', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], 25, false);
 
     base_layer.resizeWorld();
 
@@ -72,8 +74,6 @@ export default class extends Phaser.State {
     // Create the player from the player object layer
     map.createFromObjects('player', 1, 'player', 0, true, false, this.player);
 
-    // Enables physics on the player of type arcade
-    game.physics.arcade.enableBody(this.player.children[0]);
 
     // Renames the player group to be the one sprite that is the child.
     // Reason for this is to keep the code consistant with what was there before.
@@ -84,14 +84,13 @@ export default class extends Phaser.State {
     this.player.body.gravity.y = 600;
 
     // This is the base (floor)
-    map.setCollision([3,4,5,6,7,8,9,10,11,12,13]);
+    map.setCollision([3,4,5,6,7,8,9,10,11,12,13], true, base_layer);
     // This is the lava_layer
     // TODO: Fix spikes (they should act the same as lava)
     map.setCollision([1,2,3], true, lava_layer);
 
     //  And now we convert all of the Tiled objects with an ID of 34 into sprites within the coins group
     map.createFromObjects('Object Layer 1', 121, 'coin', 0, true, false, this.coins);
-    // map.createFromObjects('Object Layer 1', 1, 'coin', 0, true, false, this.coins);
 
 
     game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
@@ -104,13 +103,13 @@ export default class extends Phaser.State {
     // Call the 'takeCoin' function when the player takes a coin
     game.physics.arcade.overlap(this.player, this.coins, this.takeCoin, null, this);
 
+    game.physics.arcade.overlap(this.player, teleporters, this.teleport, null, this);
+
     // Call the 'restart' function when the player touches the enemy
     game.physics.arcade.collide(this.player, lava_layer, this.restart, null, this);
 
     // Move the player when an arrow key is pressed
     if (this.cursor.left.isDown) {
-      this.teleporter.animations.play("teleporterAnimation", 25, false);
-      this.teleporter.idleFrame = 0;
       this.player.body.velocity.x = -200;
     }
     else if (this.cursor.right.isDown) {
@@ -129,8 +128,19 @@ export default class extends Phaser.State {
 
   // Function to kill a coin
   takeCoin (player, coin) {
-    gameSound.play();
+    coinSound.play();
     coin.kill();
+  }
+
+  teleport () {
+
+    teleporters.callAll('animations.play', 'animations', 'teleporterAnimation');
+    setTimeout(function(){
+      if (teleported === false){
+        game.state.start('Game');
+        teleported = true;
+      }
+     }, 1000);
   }
 
   // Function to restart the game
