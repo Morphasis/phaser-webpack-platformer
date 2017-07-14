@@ -66,6 +66,7 @@ export default class extends Phaser.State {
     base_layer.resizeWorld();
 
     // Variable to store the arrow key pressed
+    this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.cursor = game.input.keyboard.createCursorKeys();
 
     // Substtute player
@@ -118,7 +119,7 @@ export default class extends Phaser.State {
       this.player.body.velocity.x = 0;
     }
 
-    if (this.cursor.up.isDown && this.player.body.blocked.down) {
+  if ((this.cursor.up.isDown || this.spaceKey.isDown) && this.player.body.blocked.down) {
       this.player.body.velocity.y = -350;
     }
   }
