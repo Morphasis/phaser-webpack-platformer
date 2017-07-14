@@ -11,6 +11,7 @@ var teleporters;
 var teleported = false;
 var score = 0;
 var scoreText;
+var timer;
 
 export default class extends Phaser.State {
   init (){
@@ -36,7 +37,13 @@ export default class extends Phaser.State {
     }
   }
 
+  updateCounter () {
+    score--
+    scoreText.text = 'score: ' + score;
+  }
+
   create () {
+    score = 0;
     // capture coin sound
     coinSound = game.add.audio('coinSound');
 
@@ -95,8 +102,19 @@ export default class extends Phaser.State {
 
     // Camera follow player
     game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
+    // Add scoreboard
     scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
     scoreText.fixedToCamera = true;
+
+    //  Create our Timer
+    timer = game.time.create(false);
+
+    //  Set a TimerEvent to occur after 2 seconds
+    timer.loop(2000, this.updateCounter, this);
+
+    //  Start the timer running - this is important!
+    //  It won't start automatically, allowing you to hook it to button events and the like.
+    timer.start();
   }
 
   update () {
@@ -134,11 +152,10 @@ export default class extends Phaser.State {
     coinSound.play();
     coin.kill();
     score += 10;
-    scoreText.text = 'Score: ' + score;
+    scoreText.text = 'score: ' + score;
   }
 
   teleport () {
-
     teleporters.callAll('animations.play', 'animations', 'teleporterAnimation');
     setTimeout(function(){
       if (teleported === false){
