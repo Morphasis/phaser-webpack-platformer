@@ -51,34 +51,36 @@ export default class extends Phaser.State {
     non_colide_layer = map.createLayer('non_colide2');
     lava_layer = map.createLayer('lava');
 
-    // Animations
+    // Setup groups
     this.coins = game.add.group();
     this.player = game.add.group();
     teleporters = game.add.group();
 
 
 
-    //  Here we create our coins group
+    // Here we set the physics
     this.coins.enableBody = true;
     teleporters.enableBody = true;
     this.player.enableBody = true;
-
-    map.createFromObjects('Object Layer 1', 14766, 'teleporter_ani', 0, true, false, teleporters);
-    teleporters.callAll('animations.add', 'animations', 'teleporterAnimation', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], 25, false);
 
     base_layer.resizeWorld();
 
     // Variable to store the arrow key pressed
     this.cursor = game.input.keyboard.createCursorKeys();
 
-    // Create the player from the player object layer
+    // Substtute player
     map.createFromObjects('player', 1, 'player', 0, true, false, this.player);
+    // Substtute teleporter
+    map.createFromObjects('Object Layer 1', 14766, 'teleporter_ani', 0, true, false, teleporters);
+    // Substtute coins
+    map.createFromObjects('Object Layer 1', 121, 'coin', 0, true, false, this.coins);
 
+    // Animations
+    teleporters.callAll('animations.add', 'animations', 'teleporterAnimation', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], 25, false);
 
     // Renames the player group to be the one sprite that is the child.
     // Reason for this is to keep the code consistant with what was there before.
     this.player = this.player.children[0]
-
 
     // Add gravity to make it fall
     this.player.body.gravity.y = 600;
@@ -89,10 +91,7 @@ export default class extends Phaser.State {
     // TODO: Fix spikes (they should act the same as lava)
     map.setCollision([1,2,3], true, lava_layer);
 
-    //  And now we convert all of the Tiled objects with an ID of 34 into sprites within the coins group
-    map.createFromObjects('Object Layer 1', 121, 'coin', 0, true, false, this.coins);
-
-
+    // Camera follow player
     game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
   }
 
