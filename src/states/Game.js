@@ -147,12 +147,15 @@ export default class extends Phaser.State {
     }
 
     // TODO: Add right facing turrets and assets
-    // TODO: Handle bullet collisions
 
   }
 
   update () {
 
+    // game.physics.arcade.overlap(this.player, this.darts_left, this.asdasd, null, this);
+    for (var i=0, l=dartTraps.children.length; i<l; i++) {
+      game.physics.arcade.overlap(this.player, darts_left[i].bullets, this.asdasd, null, this);
+    }
     scoreText.x = Math.floor(scoreBackgroundSprite.x + scoreBackgroundSprite.width / 2);
     scoreText.y = Math.floor(scoreBackgroundSprite.y + scoreBackgroundSprite.height / 2);
     // Make the player and the walls collide
@@ -186,7 +189,7 @@ export default class extends Phaser.State {
   render () {}
 
   asdasd () {
-    console.log('potato');
+    game.state.start('Game');
   }
   dartsFire () {
     for (var i=0, l=dartTraps.children.length; i<l; i++) {
