@@ -13,6 +13,8 @@ var score = 0;
 var scoreText;
 var timer;
 
+var scoreBackgroundSprite;
+
 export default class extends Phaser.State {
   init (){
     // Start the Arcade physics system (for movements and collisions)
@@ -26,6 +28,7 @@ export default class extends Phaser.State {
     // Platformer images
     game.load.image('player', 'assets/player.png');
     game.load.image('coin', 'assets/coin.png');
+    game.load.image('scoreBackground', 'assets/score_counter.png');
 
     game.load.tilemap('level', 'assets/level.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'assets/Set_01.png');
@@ -35,11 +38,6 @@ export default class extends Phaser.State {
         teleported = false;
       }, 3000);
     }
-  }
-
-  updateCounter () {
-    score--
-    scoreText.text = 'score: ' + score;
   }
 
   create () {
@@ -103,8 +101,17 @@ export default class extends Phaser.State {
     // Camera follow player
     game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER)
     // Add scoreboard
-    scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    // scoreBackgroundSprite = game.add.sprite( 128, 64, 'scoreBackground');
+    scoreBackgroundSprite = game.add.sprite(10, 10, 'scoreBackground');
+
+    var style = { font: "20px Arial", wordWrap: true, wordWrapWidth: scoreBackgroundSprite.width, align: "center" };
+
+
+    scoreText = game.add.text(75, 55, '0', style);
+    scoreText.anchor.set(0.5);
+
     scoreText.fixedToCamera = true;
+    scoreBackgroundSprite.fixedToCamera = true;
 
     //  Create our Timer
     timer = game.time.create(false);
@@ -118,6 +125,8 @@ export default class extends Phaser.State {
   }
 
   update () {
+    scoreText.x = Math.floor(scoreBackgroundSprite.x + scoreBackgroundSprite.width / 2);
+    scoreText.y = Math.floor(scoreBackgroundSprite.y + scoreBackgroundSprite.height / 2);
     // Make the player and the walls collide
     game.physics.arcade.collide(this.player, base_layer);
 
@@ -152,7 +161,12 @@ export default class extends Phaser.State {
     coinSound.play();
     coin.kill();
     score += 10;
-    scoreText.text = 'score: ' + score;
+    scoreText.text = score;
+  }
+
+  updateCounter () {
+    score--
+    scoreText.text = score;
   }
 
   teleport () {
