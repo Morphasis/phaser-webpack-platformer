@@ -12,8 +12,12 @@ var teleported = false;
 var score = 0;
 var scoreText;
 var timer;
-
 var scoreBackgroundSprite;
+
+var darts_left = [];
+var darts_right = [];
+var fireButton;
+var dartTraps;
 
 export default class extends Phaser.State {
   init (){
@@ -29,6 +33,8 @@ export default class extends Phaser.State {
     game.load.image('player', 'assets/player.png');
     game.load.image('coin', 'assets/coin.png');
     game.load.image('scoreBackground', 'assets/score_counter.png');
+    game.load.image('dart', 'assets/dart.png');
+    game.load.image('dart_trap_left', 'assets/dart_trap_left.png');
 
     game.load.tilemap('level', 'assets/level.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles', 'assets/Set_01.png');
@@ -61,6 +67,7 @@ export default class extends Phaser.State {
     this.coins = game.add.group();
     this.player = game.add.group();
     teleporters = game.add.group();
+    dartTraps = game.add.group();
 
 
 
@@ -122,9 +129,30 @@ export default class extends Phaser.State {
     //  Start the timer running - this is important!
     //  It won't start automatically, allowing you to hook it to button events and the like.
     timer.start();
+    //  Creates 30 bullets, using the 'bullet' graphic
+    map.createFromObjects('Object Layer 1', 14641, 'dart_trap_left', 0, true, false, dartTraps);
+
+    // dartTraps.children.every(this.dartTrapsToTrack);
+    dartTraps.children[0]
+
+    for (var i=0, l=dartTraps.children.length; i<l; i++) {
+      darts_left[i] = game.add.weapon(40, 'dart');
+      darts_left[i].bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+      darts_left[i].bulletSpeed = 400;
+      darts_left[i].fireRate = 2000;
+      darts_left[i].trackSprite(dartTraps.children[i], 0, 15, true);
+      darts_left[i].trackRotation = false;
+      darts_left[i].fireAngle = Phaser.ANGLE_LEFT;
+      darts_left[i].autofire = true;
+    }
+
+    // TODO: Add right facing turrets and assets
+    // TODO: Handle bullet collisions
+
   }
 
   update () {
+
     scoreText.x = Math.floor(scoreBackgroundSprite.x + scoreBackgroundSprite.width / 2);
     scoreText.y = Math.floor(scoreBackgroundSprite.y + scoreBackgroundSprite.height / 2);
     // Make the player and the walls collide
@@ -152,10 +180,19 @@ export default class extends Phaser.State {
   if ((this.cursor.up.isDown || this.spaceKey.isDown) && this.player.body.blocked.down) {
       this.player.body.velocity.y = -350;
     }
+  // game.input.keyboard.onDownCallback = function() {        console.log(game.input.keyboard.event.keyCode);       };
   }
 
   render () {}
 
+  asdasd () {
+    console.log('potato');
+  }
+  dartsFire () {
+    for (var i=0, l=dartTraps.children.length; i<l; i++) {
+      darts_left[i].fire()
+    }
+  }
   // Function to kill a coin
   takeCoin (player, coin) {
     coinSound.play();
