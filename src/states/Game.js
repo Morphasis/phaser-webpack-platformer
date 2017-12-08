@@ -7,6 +7,8 @@ var lava_layer;
 var non_colide_layer;
 var background_layer;
 var coinSound;
+var arrowSound;
+var deathSound;
 var teleporters;
 var teleported = false;
 var score = 0;
@@ -28,6 +30,8 @@ export default class extends Phaser.State {
   }
   preload () {
     game.load.audio('coinSound', 'assets/coin_sound.wav');
+    game.load.audio('arrowSound', 'assets/arrow_sound.wav');
+    game.load.audio('deathSound', 'assets/death_sound.wav');
 
     // Platformer images
     game.load.image('player', 'assets/player.png');
@@ -50,6 +54,8 @@ export default class extends Phaser.State {
     score = 0;
     // capture coin sound
     coinSound = game.add.audio('coinSound');
+    arrowSound = game.add.audio('arrowSound');
+    deathSound = game.add.audio('deathSound');
 
     map = game.add.tilemap('level');
 
@@ -132,19 +138,20 @@ export default class extends Phaser.State {
     //  Creates 30 bullets, using the 'bullet' graphic
     map.createFromObjects('Object Layer 1', 14641, 'dart_trap_left', 0, true, false, dartTraps);
 
-    // dartTraps.children.every(this.dartTrapsToTrack);
-    dartTraps.children[0]
-
     for (var i=0, l=dartTraps.children.length; i<l; i++) {
       darts_left[i] = game.add.weapon(40, 'dart');
       darts_left[i].bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-      darts_left[i].bulletSpeed = 400;
+      darts_left[i].bulletSpeed = 300;
       darts_left[i].fireRate = 2000;
       darts_left[i].trackSprite(dartTraps.children[i], 0, 15, true);
       darts_left[i].trackRotation = false;
       darts_left[i].fireAngle = Phaser.ANGLE_LEFT;
       darts_left[i].autofire = true;
     }
+
+    darts_left[1].onFire.add(function(){
+      arrowSound.play();
+    })
 
     // TODO: Add right facing turrets and assets
 
@@ -154,7 +161,7 @@ export default class extends Phaser.State {
 
     // game.physics.arcade.overlap(this.player, this.darts_left, this.asdasd, null, this);
     for (var i=0, l=dartTraps.children.length; i<l; i++) {
-      game.physics.arcade.overlap(this.player, darts_left[i].bullets, this.asdasd, null, this);
+      game.physics.arcade.overlap(this.player, darts_left[i].bullets, this.bulletCollide, null, this);
     }
     scoreText.x = Math.floor(scoreBackgroundSprite.x + scoreBackgroundSprite.width / 2);
     scoreText.y = Math.floor(scoreBackgroundSprite.y + scoreBackgroundSprite.height / 2);
@@ -188,13 +195,9 @@ export default class extends Phaser.State {
 
   render () {}
 
-  asdasd () {
+  bulletCollide () {
+    deathSound.play();
     game.state.start('Game');
-  }
-  dartsFire () {
-    for (var i=0, l=dartTraps.children.length; i<l; i++) {
-      darts_left[i].fire()
-    }
   }
   // Function to kill a coin
   takeCoin (player, coin) {
